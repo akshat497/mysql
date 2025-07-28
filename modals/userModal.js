@@ -1,13 +1,13 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../configs/connection.js"  // Import the Sequelize instance
-
+import { v4 as  uuidv4 } from "uuid";
 export const User = sequelize.define('User', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+  userId: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4, // or use: defaultValue: () => uuidv4()
+    primaryKey: true
   },
-  username: {
+  name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
