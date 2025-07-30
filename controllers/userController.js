@@ -1,7 +1,7 @@
 import { where } from "sequelize";
 import { User } from "../modals/userModal.js";
-import jwt from 'jsonwebtoken'
 const JwtSecreat="bookingByAkshat"
+import jwt from 'jsonwebtoken'
 const userController = {
   create: async (req, res) => {
     try {
@@ -20,16 +20,36 @@ const userController = {
       res.status(500).json({ error: error.message});
     }
   },
+  Login: async (req, res) => {
+    try {
+      const {  email, password } = req.body;
+      console.log("userDetaile", email, password)
+      const user= await User.findOne({where:{email:email}});
+      console.log("userishere",user)
+      if(!user){
+        return res.status(404).json({success:false,message:"user not found "})
+      }
+      if(user?.password.toString()===password.toString() && user?.email===email){
+        const payload={
+          userId:user?.userId,
+          role:user?.role
+  
+        }
+        const token=jwt?.sign(payload,JwtSecreat,{ expiresIn: '1h' })
+        return res.status(200).json({success:true,token:token});
+
+      }else{
+        return res.status(401).json({success:false,message:"wrong password or user"});
+      }
+      
+    } catch(error) {
+      console.error("Error loggin in user:", error);
+      return res.status(500).json({ error: error.message});
+    }
+  },
   geAllUsers: async (req, res) => {
     try {
-      const token= req.headers['authorization']?.split(' ')[1];
-      const response=jwt.verify(token,JwtSecreat);
-      if(response){
-       
-      }else{
-        res.status(401).json({success:false,message:"forbidded"})
-      }
-      const users = await User.findAll();
+      const users = await User.findAll({where:{userId:req.user}});
       res.status(200).json({success:true,message:"user fetched success" ,data:users});
     } catch (error) {
       console.error("Error fetching users:", error);
